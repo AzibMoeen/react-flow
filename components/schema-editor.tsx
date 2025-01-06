@@ -84,8 +84,9 @@ export default function SchemaEditor() {
     },
     [setEdges]
   )
-
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleAddTable = useCallback(
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (tableName: any, fields: any[]) => {
       const position = {
         x: Math.random() * 500,
