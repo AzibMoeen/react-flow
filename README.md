@@ -87,6 +87,11 @@ Ensure you have the following installed on your machine:
 4. Use the import feature to upload a previously exported JSON file and continue working.
 5. Generate SQL code for your schema with a single click.
 
+<div align="center">
+  <img src="path/to/your/image.png" alt="SQL Schema Creator Preview" style="width: 100%;" />
+</div>
+
+
 
 Enjoy designing your database schemas with ease!
 
