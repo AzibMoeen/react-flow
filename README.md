@@ -24,6 +24,12 @@ The **SQL Schema Creator** is a web-based tool built with Next.js that allows us
 - **React Flow**: For visualizing and managing the schema design interface.
 - **UUID**: For generating unique identifiers for tables and relationships.
 
+## Preview
+
+<div align="center">
+  <img src="Preview.jpeg" alt="SQL Schema Creator Preview" style="width: 100%;" />
+</div>
+
 ## Getting Started
 
 Follow these steps to clone and run the project locally:
@@ -86,11 +92,6 @@ Ensure you have the following installed on your machine:
 3. Use the export feature to download your schema as a JSON file.
 4. Use the import feature to upload a previously exported JSON file and continue working.
 5. Generate SQL code for your schema with a single click.
-
-<div align="center">
-  <img src="path/to/your/image.png" alt="SQL Schema Creator Preview" style="width: 100%;" />
-</div>
-
 
 
 Enjoy designing your database schemas with ease!
