@@ -58,9 +58,9 @@ export function TableNode({ data, id }: TableNodeProps) {
           </DropdownMenu>
         </CardHeader>
         <CardContent className="grid gap-2">
-          {data.fields.map((field: Field) => (
+          {data.fields.map((field: Field,index) => (
             <div
-              key={field.id}
+              key={index}
               className="flex items-center justify-between text-sm px-3 py-2 rounded-md bg-muted/50 hover:bg-muted transition-colors"
             >
               <div className="flex items-center gap-2 flex-1">

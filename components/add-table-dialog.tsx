@@ -20,14 +20,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldType, createField } from '../types/schema'
 
 interface AddTableDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onAdd: (tableName: string, fields: Array<{ name: string; type: string; isPrimary?: boolean }>) => void
+  onAdd: (tableName: string, fields: Field[]) => void
 }
 
-const DATA_TYPES = [
+const DATA_TYPES: FieldType[] = [
   'INTEGER',
   'TEXT',
   'VARCHAR',
@@ -40,20 +41,20 @@ const DATA_TYPES = [
 
 export function AddTableDialog({ open, onOpenChange, onAdd }: AddTableDialogProps) {
   const [tableName, setTableName] = useState('')
-  const [fields, setFields] = useState([{ name: '', type: 'INTEGER', isPrimary: false }])
+  const [fields, setFields] = useState<Field[]>([createField()])
 
   const handleAddField = () => {
-    setFields([...fields, { name: '', type: 'INTEGER', isPrimary: false }])
+    setFields([...fields, createField()])
   }
 
-  const handleRemoveField = (index: number) => {
-    setFields(fields.filter((_, i) => i !== index))
+  const handleRemoveField = (fieldId: string) => {
+    setFields(fields.filter((field) => field.id !== fieldId))
   }
 
-  const handleFieldChange = (index: number, field: { name?: string; type?: string; isPrimary?: boolean }) => {
-    const newFields = [...fields]
-    newFields[index] = { ...newFields[index], ...field }
-    setFields(newFields)
+  const handleFieldChange = (fieldId: string, updates: Partial<Field>) => {
+    setFields(fields.map((field) =>
+      field.id === fieldId ? { ...field, ...updates } : field
+    ))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -61,7 +62,7 @@ export function AddTableDialog({ open, onOpenChange, onAdd }: AddTableDialogProp
     if (tableName && fields.every(f => f.name && f.type)) {
       onAdd(tableName, fields)
       setTableName('')
-      setFields([{ name: '', type: 'INTEGER', isPrimary: false }])
+      setFields([createField()])
     }
   }
 
@@ -83,17 +84,17 @@ export function AddTableDialog({ open, onOpenChange, onAdd }: AddTableDialogProp
           </div>
           <div className="grid gap-4">
             <Label>Fields</Label>
-            {fields.map((field, index) => (
-              <div key={index} className="flex gap-2">
+            {fields.map((field) => (
+              <div key={field.id} className="flex gap-2">
                 <Input
                   value={field.name}
-                  onChange={(e) => handleFieldChange(index, { name: e.target.value })}
+                  onChange={(e) => handleFieldChange(field.id, { name: e.target.value })}
                   placeholder="Field name"
                   className="flex-1"
                 />
                 <Select
                   value={field.type}
-                  onValueChange={(value) => handleFieldChange(index, { type: value })}
+                  onValueChange={(value) => handleFieldChange(field.id, { type: value as FieldType })}
                 >
                   <SelectTrigger className="w-[140px]">
                     <SelectValue />
@@ -108,19 +109,19 @@ export function AddTableDialog({ open, onOpenChange, onAdd }: AddTableDialogProp
                 </Select>
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    id={`primary-${index}`}
+                    id={`primary-${field.id}`}
                     checked={field.isPrimary}
                     onCheckedChange={(checked) => 
-                      handleFieldChange(index, { isPrimary: checked as boolean })
+                      handleFieldChange(field.id, { isPrimary: checked as boolean })
                     }
                   />
-                  <Label htmlFor={`primary-${index}`}>PK</Label>
+                  <Label htmlFor={`primary-${field.id}`}>PK</Label>
                 </div>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleRemoveField(index)}
+                  onClick={() => handleRemoveField(field.id)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Table, Field, FieldType } from '../types/schema'
+import { Table, Field, FieldType ,createField} from '../types/schema'
 
 interface EditTableDialogProps {
   table: Table
@@ -50,18 +50,7 @@ export function EditTableDialog({
   const [fields, setFields] = useState<Field[]>(table.fields)
 
   const handleAddField = () => {
-    setFields([
-      ...fields,
-      {
-        id: `field-${Date.now()}`,
-        name: '',
-        type: 'INTEGER',
-        isPrimary: false,
-        isForeign: false,
-        isUnique: false,
-        isNullable: true,
-      },
-    ])
+    setFields([...fields, createField()])
   }
 
   const handleRemoveField = (fieldId: string) => {
@@ -108,7 +97,6 @@ export function EditTableDialog({
               <div key={field.id} className="flex gap-2 items-start">
                 <div className="grid gap-2 flex-1">
                   <Input
-                    key={`input-${field.id}`}
                     value={field.name}
                     onChange={(e) =>
                       handleFieldChange(field.id, { name: e.target.value })
@@ -116,7 +104,7 @@ export function EditTableDialog({
                     placeholder="Field name"
                   />
                   <div className="flex gap-2">
-                    <div key={`primary-group-${field.id}`} className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <Checkbox
                         id={`primary-${field.id}`}
                         checked={field.isPrimary}
@@ -130,7 +118,7 @@ export function EditTableDialog({
                         <Key className="h-3 w-3" /> Primary
                       </Label>
                     </div>
-                    <div key={`foreign-group-${field.id}`} className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <Checkbox
                         id={`foreign-${field.id}`}
                         checked={field.isForeign}
@@ -144,7 +132,7 @@ export function EditTableDialog({
                         <Link2 className="h-3 w-3" /> Foreign
                       </Label>
                     </div>
-                    <div key={`unique-group-${field.id}`} className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <Checkbox
                         id={`unique-${field.id}`}
                         checked={field.isUnique}
@@ -156,7 +144,7 @@ export function EditTableDialog({
                       />
                       <Label htmlFor={`unique-${field.id}`}>Unique</Label>
                     </div>
-                    <div key={`nullable-group-${field.id}`} className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <Checkbox
                         id={`nullable-${field.id}`}
                         checked={field.isNullable}
@@ -171,7 +159,6 @@ export function EditTableDialog({
                   </div>
                 </div>
                 <Select
-                  key={`select-${field.id}`}
                   value={field.type}
                   onValueChange={(value: FieldType) =>
                     handleFieldChange(field.id, { type: value })

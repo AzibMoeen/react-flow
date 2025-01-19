@@ -15,20 +15,25 @@ import ReactFlow, {
   EdgeTypes,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
-import { Plus, Save, FileUp, Download } from 'lucide-react'
+import { Plus, Save, FileUp, Download, Code } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { TableNode } from './table-node'
+
 import { AddTableDialog } from './add-table-dialog'
-import { Table, Relationship, Field } from '@/types/schema'
+
+import { Table,Relationship,Field,RelationType,createTable,createField } from '@/types/schema'
+import { v4 as uuidv4 } from 'uuid'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { RelationshipEdge,RelationType } from './relationship-edge'
+import { RelationshipEdge } from './relationship-edge'
 import { useToast } from '@/hooks/use-toast'
+import { SQLCodeDialog } from './sql-code-dialog'
+import { TableNode } from './table-node'
+
 
 const nodeTypes = {
   table: TableNode,
@@ -42,6 +47,7 @@ export default function SchemaEditor() {
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
   const [showAddTable, setShowAddTable] = useState(false)
+  const [sqlCode, setSqlCode] = useState('')
   const { toast } = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -49,6 +55,7 @@ export default function SchemaEditor() {
     (params: Connection | Edge) => {
       const edge = {
         ...params,
+        id: uuidv4(),
         type: 'relationship',
         animated: true,
         data: {
@@ -84,21 +91,19 @@ export default function SchemaEditor() {
     },
     [setEdges]
   )
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const handleAddTable = useCallback(
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (tableName: any, fields: any[]) => {
+    (tableName: string, fields: Field[]) => {
       const position = {
         x: Math.random() * 500,
         y: Math.random() * 500,
       }
 
-      const newTable: Table = {
-        id: `table-${Date.now()}`,
+      const newTable = createTable({
         name: tableName,
         fields,
         position,
-      }
+      })
 
       const newNode: Node = {
         id: newTable.id,
@@ -248,6 +253,45 @@ export default function SchemaEditor() {
     }
   }
 
+  const generateSQLCode = () => {
+    let sql = ''
+
+    // Create tables
+    nodes.forEach((node) => {
+      sql += `CREATE TABLE ${node.data.name} (\n`
+      node.data.fields.forEach((field: Field, index: number) => {
+        sql += `  ${field.name} ${field.type}`
+        if (field.isPrimary) sql += ' PRIMARY KEY'
+        if (field.isUnique) sql += ' UNIQUE'
+        if (!field.isNullable) sql += ' NOT NULL'
+        if (index < node.data.fields.length - 1) sql += ','
+        sql += '\n'
+      })
+      sql += ');\n\n'
+    })
+
+    // Add foreign key constraints
+    edges.forEach((edge) => {
+      const sourceTable = nodes.find((node) => node.id === edge.source)
+      const targetTable = nodes.find((node) => node.id === edge.target)
+      const sourceField = sourceTable?.data.fields.find((f: Field) => f.id === edge.sourceHandle?.split('-')[0])
+      const targetField = targetTable?.data.fields.find((f: Field) => f.id === edge.targetHandle?.split('-')[0])
+
+      if (sourceTable && targetTable && sourceField && targetField) {
+        sql += `ALTER TABLE ${sourceTable.data.name}\n`
+        sql += `ADD CONSTRAINT fk_${sourceTable.data.name}_${targetTable.data.name}\n`
+        sql += `  FOREIGN KEY (${sourceField.name})\n`
+        sql += `  REFERENCES ${targetTable.data.name}(${targetField.name});\n\n`
+      }
+    })
+
+    setSqlCode(sql)
+    toast({
+      title: "SQL Code Generated",
+      description: "Your SQL code has been generated successfully.",
+    })
+  }
+
   return (
     <div className="w-full h-screen">
       <div className="absolute top-4 left-4 z-10 flex gap-2">
@@ -294,7 +338,19 @@ export default function SchemaEditor() {
               Load a schema from a JSON file
             </TooltipContent>
           </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" onClick={generateSQLCode}>
+                <Code className="mr-2 h-4 w-4" />
+                Create SQL
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              Generate SQL code from the current schema
+            </TooltipContent>
+          </Tooltip>
         </TooltipProvider>
+        {sqlCode && <SQLCodeDialog sqlCode={sqlCode} />}
       </div>
       <ReactFlow
         nodes={nodes}
@@ -316,7 +372,6 @@ export default function SchemaEditor() {
       <AddTableDialog
         open={showAddTable}
         onOpenChange={setShowAddTable}
-    
         onAdd={handleAddTable}
       />
     </div>
