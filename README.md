@@ -27,7 +27,7 @@ The **SQL Schema Creator** is a web-based tool built with Next.js that allows us
 ## Preview
 
 <div align="center">
-  <img src="Preview.jpeg" alt="SQL Schema Creator Preview" style="width: 100%;" />
+  <img src="public/Preview.jpeg" alt="SQL Schema Creator Preview" style="width: 100%;" />
 </div>
 
 ## Getting Started
