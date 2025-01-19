@@ -1,4 +1,4 @@
-import SchemaEditor from './schema-editor'
+import SchemaEditor from "./components/schema-editor"
 
 export default function Page() {
   return (
